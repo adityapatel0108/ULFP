@@ -1,0 +1,91 @@
+# Configuration file for Fast Unlearning on Linearized Face Recognition Models
+
+# Dataset paths
+data:
+  root_dir: "./data"
+  ms1mv2:
+    path: "./data/ms1m-retinaface-t1"
+    num_identities: 85000
+    num_images: 5000000
+  
+  evaluation:
+    lfw: "./data/lfw"
+    cfp_fp: "./data/cfp_fp"
+    agedb_30: "./data/agedb_30"
+    calfw: "./data/calfw"
+    cplfw: "./data/cplfw"
+    ijb_b: "./data/ijb_b"
+    ijb_c: "./data/ijb_c"
+
+# Model configuration
+model:
+  # Option 1: Use InsightFace models (recommended)
+  use_insightface: true
+  insightface_model: "buffalo_l"  # Options: buffalo_l, buffalo_m, buffalo_s
+  
+  # Option 2: Use iResNet backbones
+  backbone: "iresnet50"  # Options: iresnet18, iresnet50, iresnet100
+  embedding_size: 512
+  pretrained_path: "./checkpoints/pretrained"
+  loss_type: "arcface"  # Options: arcface, magface, adaface
+  
+  # ArcFace parameters
+  arcface:
+    margin: 0.5
+    scale: 64.0
+
+# Linearizer configuration
+linearizer:
+  latent_dim: 512  # Dimension of latent space
+  num_blocks: 4    # Number of invertible blocks in each network
+  num_layers: 3    # Number of layers in coupling networks
+  hidden_dim: 1024 # Hidden dimension for invertible networks
+  learning_rate: 0.0001
+  batch_size: 64
+  num_epochs: 100
+  checkpoint_dir: "./checkpoints/linearizer"
+
+# Unlearning configuration
+unlearning:
+  method: "orthogonal_projection"  # Options: orthogonal_projection, svd_update, linear_combination
+  target_identities: []  # List of identity IDs to unlearn
+  retain_ratio: 0.95  # Minimum accuracy retention on remaining data
+  
+  # Orthogonal projection parameters
+  orthogonal_projection:
+    threshold: 0.01
+    
+  # SVD update parameters
+  svd_update:
+    rank: 50
+    alpha: 0.1
+
+# Evaluation configuration
+evaluation:
+  batch_size: 128
+  num_folds: 10  # For LFW evaluation
+  fmr_thresholds: [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]  # For IJB-B/C
+  results_dir: "./results"
+
+# Training configuration
+training:
+  batch_size: 128
+  num_workers: 4
+  learning_rate: 0.1
+  momentum: 0.9
+  weight_decay: 0.0005
+  num_epochs: 100
+  checkpoint_freq: 10
+  log_freq: 100
+
+# Device configuration
+device:
+  cuda: true
+  gpu_ids: [0]  # List of GPU IDs to use
+
+# Logging
+logging:
+  log_dir: "./logs"
+  use_tensorboard: true
+  use_wandb: false
+  wandb_project: "fast-unlearning-face-recognition"
